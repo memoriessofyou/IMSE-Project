@@ -1,0 +1,451 @@
+<svg width="1716pt" height="1033pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" style="overflow: hidden; "><g id="viewport-20260415215055217" class="svg-pan-zoom_viewport" transform="matrix(0.566108951069024,0,0,0.566108951069024,83.7360618114472,-0.0000033830986581051548)" style="transform: matrix(0.566109, 0, 0, 0.566109, 83.7361, -3.3831e-06);">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1029.37)">
+<title>ER</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1029.37 1712.15,-1029.37 1712.15,4 -4,4"></polygon>
+<!-- User -->
+<g id="node1" class="node">
+<title>User</title>
+<polygon fill="#fcfcfc" stroke="black" points="894.28,-872.37 840.28,-872.37 840.28,-836.37 894.28,-836.37 894.28,-872.37"></polygon>
+<text text-anchor="middle" x="867.28" y="-850.77" font-family="Arial" font-size="12.00">User</text>
+</g>
+<!-- u_id -->
+<g id="node9" class="node">
+<title>u_id</title>
+<ellipse fill="none" stroke="black" cx="1161.28" cy="-686.19" rx="36" ry="18"></ellipse>
+<text text-anchor="start" x="1141.61" y="-683.59" font-family="Arial" text-decoration="underline" font-size="12.00">user_id</text>
+</g>
+<!-- User&#45;&#45;u_id -->
+<g id="edge1" class="edge">
+<title>User--u_id</title>
+<path fill="none" stroke="black" d="M894.68,-837.89C952.13,-805.41 1084.31,-730.69 1137.99,-700.35"></path>
+</g>
+<!-- u_name -->
+<g id="node10" class="node">
+<title>u_name</title>
+<ellipse fill="none" stroke="black" cx="1277.28" cy="-686.19" rx="44.3" ry="18"></ellipse>
+<text text-anchor="middle" x="1277.28" y="-682.59" font-family="Arial" font-size="12.00">username</text>
+</g>
+<!-- User&#45;&#45;u_name -->
+<g id="edge2" class="edge">
+<title>User--u_name</title>
+<path fill="none" stroke="black" d="M894.5,-842.34C967.92,-812.58 1169.67,-730.8 1246.77,-699.55"></path>
+</g>
+<!-- u_xp -->
+<g id="node11" class="node">
+<title>u_xp</title>
+<ellipse fill="none" stroke="black" cx="752.28" cy="-686.19" rx="37.06" ry="18"></ellipse>
+<text text-anchor="middle" x="752.28" y="-682.59" font-family="Arial" font-size="12.00">total_xp</text>
+</g>
+<!-- User&#45;&#45;u_xp -->
+<g id="edge3" class="edge">
+<title>User--u_xp</title>
+<path fill="none" stroke="black" d="M855.19,-835.9C832.82,-803.57 785.26,-734.83 763.53,-703.44"></path>
+</g>
+<!-- Earns -->
+<g id="node37" class="node">
+<title>Earns</title>
+<polygon fill="#ffffff" stroke="black" points="867.28,-704.19 825.72,-686.19 867.28,-668.19 908.85,-686.19 867.28,-704.19"></polygon>
+<text text-anchor="middle" x="867.28" y="-682.59" font-family="Arial" font-size="12.00">earns</text>
+</g>
+<!-- User&#45;&#45;Earns -->
+<g id="edge32" class="edge">
+<title>User--Earns</title>
+<path fill="none" stroke="black" d="M867.28,-835.9C867.28,-803.98 867.28,-736.6 867.28,-704.67"></path>
+<text text-anchor="middle" x="871.45" y="-769.37" font-family="Arial" font-size="10.00">M</text>
+</g>
+<!-- Studies -->
+<g id="node38" class="node">
+<title>Studies</title>
+<polygon fill="#ffffff" stroke="black" points="630.28,-704.19 581.49,-686.19 630.28,-668.19 679.08,-686.19 630.28,-704.19"></polygon>
+<text text-anchor="middle" x="630.28" y="-682.59" font-family="Arial" font-size="12.00">studies</text>
+</g>
+<!-- User&#45;&#45;Studies -->
+<g id="edge34" class="edge">
+<title>User--Studies</title>
+<path fill="none" stroke="black" d="M842.37,-835.9C793.64,-801.73 686.95,-726.92 646.38,-698.47"></path>
+<text text-anchor="middle" x="760.45" y="-769.37" font-family="Arial" font-size="10.00">M</text>
+</g>
+<!-- Performs -->
+<g id="node39" class="node">
+<title>Performs</title>
+<polygon fill="#ffffff" stroke="black" points="1017.28,-704.19 958.86,-686.19 1017.28,-668.19 1075.71,-686.19 1017.28,-704.19"></polygon>
+<polygon fill="none" stroke="black" points="1017.28,-708.37 945.27,-686.19 1017.28,-664 1089.3,-686.19 1017.28,-708.37"></polygon>
+<text text-anchor="middle" x="1017.28" y="-682.59" font-family="Arial" font-size="12.00">initializes</text>
+</g>
+<!-- User&#45;&#45;Performs -->
+<g id="edge36" class="edge">
+<title>User--Performs</title>
+<path fill="none" stroke="black" d="M883.05,-835.9C912.09,-803.73 973.64,-735.54 1002.17,-703.93"></path>
+<text text-anchor="middle" x="945.06" y="-769.37" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Word -->
+<g id="node2" class="node">
+<title>Word</title>
+<polygon fill="#fcfcfc" stroke="black" points="375.28,-200 321.28,-200 321.28,-164 375.28,-164 375.28,-200"></polygon>
+<text text-anchor="middle" x="348.28" y="-178.4" font-family="Arial" font-size="12.00">Word</text>
+</g>
+<!-- w_id -->
+<g id="node16" class="node">
+<title>w_id</title>
+<ellipse fill="none" stroke="black" cx="89.28" cy="-18" rx="37.06" ry="18"></ellipse>
+<text text-anchor="start" x="68.27" y="-15.4" font-family="Arial" text-decoration="underline" font-size="12.00">word_id</text>
+</g>
+<!-- Word&#45;&#45;w_id -->
+<g id="edge8" class="edge">
+<title>Word--w_id</title>
+<path fill="none" stroke="black" d="M321.06,-163.97C269.49,-131.72 158.54,-62.32 111.31,-32.77"></path>
+</g>
+<!-- w_trans -->
+<g id="node17" class="node">
+<title>w_trans</title>
+<ellipse fill="none" stroke="black" cx="208.28" cy="-18" rx="45.58" ry="18"></ellipse>
+<text text-anchor="middle" x="208.28" y="-14.4" font-family="Arial" font-size="12.00">translation</text>
+</g>
+<!-- Word&#45;&#45;w_trans -->
+<g id="edge9" class="edge">
+<title>Word--w_trans</title>
+<path fill="none" stroke="black" d="M333.3,-163.66C306.07,-132.16 248.84,-65.93 222.32,-35.25"></path>
+</g>
+<!-- w_diff -->
+<g id="node18" class="node">
+<title>w_diff</title>
+<ellipse fill="none" stroke="black" cx="348.28" cy="-18" rx="57.93" ry="18"></ellipse>
+<text text-anchor="middle" x="348.28" y="-14.4" font-family="Arial" font-size="12.00">difficulty_level</text>
+</g>
+<!-- Word&#45;&#45;w_diff -->
+<g id="edge10" class="edge">
+<title>Word--w_diff</title>
+<path fill="none" stroke="black" d="M348.28,-163.66C348.28,-132.48 348.28,-67.3 348.28,-36.21"></path>
+</g>
+<!-- Derives -->
+<g id="node34" class="node">
+<title>Derives</title>
+<polygon fill="#ffffff" stroke="black" points="527.28,-36 441.75,-18 527.28,0 612.81,-18 527.28,-36"></polygon>
+<text text-anchor="middle" x="527.28" y="-14.4" font-family="Arial" font-size="12.00">is derived from</text>
+</g>
+<!-- Word&#45;&#45;Derives -->
+<g id="edge26" class="edge">
+<title>Word--Derives</title>
+<path fill="none" stroke="black" d="M367.44,-163.66C403.15,-131.34 479.24,-62.48 511.89,-32.93"></path>
+<text text-anchor="middle" x="446.06" y="-97" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Wordlist -->
+<g id="node3" class="node">
+<title>Wordlist</title>
+<polygon fill="#fcfcfc" stroke="black" points="519.95,-532 460.62,-532 460.62,-496 519.95,-496 519.95,-532"></polygon>
+<text text-anchor="middle" x="490.28" y="-510.4" font-family="Arial" font-size="12.00">Wordlist</text>
+</g>
+<!-- wl_id -->
+<g id="node19" class="node">
+<title>wl_id</title>
+<ellipse fill="none" stroke="black" cx="496.28" cy="-346" rx="46.43" ry="18"></ellipse>
+<text text-anchor="start" x="467.94" y="-343.4" font-family="Arial" text-decoration="underline" font-size="12.00">wordlist_id</text>
+</g>
+<!-- Wordlist&#45;&#45;wl_id -->
+<g id="edge11" class="edge">
+<title>Wordlist--wl_id</title>
+<path fill="none" stroke="black" d="M490.91,-495.55C492.07,-463.67 494.5,-396.36 495.65,-364.47"></path>
+</g>
+<!-- wl_name -->
+<g id="node20" class="node">
+<title>wl_name</title>
+<ellipse fill="none" stroke="black" cx="614.28" cy="-346" rx="36" ry="18"></ellipse>
+<text text-anchor="middle" x="614.28" y="-342.4" font-family="Arial" font-size="12.00">name</text>
+</g>
+<!-- Wordlist&#45;&#45;wl_name -->
+<g id="edge12" class="edge">
+<title>Wordlist--wl_name</title>
+<path fill="none" stroke="black" d="M503.32,-495.55C527.45,-463.25 578.73,-394.6 602.16,-363.24"></path>
+</g>
+<!-- wl_desc -->
+<g id="node21" class="node">
+<title>wl_desc</title>
+<ellipse fill="none" stroke="black" cx="47.28" cy="-346" rx="47.28" ry="18"></ellipse>
+<text text-anchor="middle" x="47.28" y="-342.4" font-family="Arial" font-size="12.00">description</text>
+</g>
+<!-- Wordlist&#45;&#45;wl_desc -->
+<g id="edge13" class="edge">
+<title>Wordlist--wl_desc</title>
+<path fill="none" stroke="black" d="M460.18,-501.72C380.24,-471.77 163.07,-390.39 80.11,-359.3"></path>
+</g>
+<!-- wl_diff -->
+<g id="node22" class="node">
+<title>wl_diff</title>
+<ellipse fill="none" stroke="black" cx="188.28" cy="-346" rx="57.93" ry="18"></ellipse>
+<text text-anchor="middle" x="188.28" y="-342.4" font-family="Arial" font-size="12.00">difficulty_level</text>
+</g>
+<!-- Wordlist&#45;&#45;wl_diff -->
+<g id="edge14" class="edge">
+<title>Wordlist--wl_diff</title>
+<path fill="none" stroke="black" d="M460.22,-496.48C401.59,-464.25 272.75,-393.43 216.02,-362.25"></path>
+</g>
+<!-- Includes -->
+<g id="node36" class="node">
+<title>Includes</title>
+<polygon fill="#ffffff" stroke="black" points="348.28,-364 282.63,-346 348.28,-328 413.94,-346 348.28,-364"></polygon>
+<text text-anchor="middle" x="348.28" y="-342.4" font-family="Arial" font-size="12.00">consists of</text>
+</g>
+<!-- Wordlist&#45;&#45;Includes -->
+<g id="edge30" class="edge">
+<title>Wordlist--Includes</title>
+<path fill="none" stroke="black" d="M475.36,-495.55C447.02,-462.42 385.95,-391.03 360.16,-360.89"></path>
+<text text-anchor="middle" x="423.45" y="-425" font-family="Arial" font-size="10.00">M</text>
+</g>
+<!-- Topic -->
+<g id="node4" class="node">
+<title>Topic</title>
+<polygon fill="#fcfcfc" stroke="black" points="390.28,-872.37 336.28,-872.37 336.28,-836.37 390.28,-836.37 390.28,-872.37"></polygon>
+<text text-anchor="middle" x="363.28" y="-850.77" font-family="Arial" font-size="12.00">Topic</text>
+</g>
+<!-- t_id -->
+<g id="node23" class="node">
+<title>t_id</title>
+<ellipse fill="none" stroke="black" cx="254.28" cy="-686.19" rx="36.64" ry="18"></ellipse>
+<text text-anchor="start" x="233.6" y="-683.59" font-family="Arial" text-decoration="underline" font-size="12.00">topic_id</text>
+</g>
+<!-- Topic&#45;&#45;t_id -->
+<g id="edge15" class="edge">
+<title>Topic--t_id</title>
+<path fill="none" stroke="black" d="M351.82,-835.9C330.62,-803.57 285.54,-734.83 264.94,-703.44"></path>
+</g>
+<!-- t_name -->
+<g id="node24" class="node">
+<title>t_name</title>
+<ellipse fill="none" stroke="black" cx="363.28" cy="-686.19" rx="36" ry="18"></ellipse>
+<text text-anchor="middle" x="363.28" y="-682.59" font-family="Arial" font-size="12.00">name</text>
+</g>
+<!-- Topic&#45;&#45;t_name -->
+<g id="edge16" class="edge">
+<title>Topic--t_name</title>
+<path fill="none" stroke="black" d="M363.28,-835.9C363.28,-803.98 363.28,-736.6 363.28,-704.67"></path>
+</g>
+<!-- t_desc -->
+<g id="node25" class="node">
+<title>t_desc</title>
+<ellipse fill="none" stroke="black" cx="134.28" cy="-686.19" rx="47.28" ry="18"></ellipse>
+<text text-anchor="middle" x="134.28" y="-682.59" font-family="Arial" font-size="12.00">description</text>
+</g>
+<!-- Topic&#45;&#45;t_desc -->
+<g id="edge17" class="edge">
+<title>Topic--t_desc</title>
+<path fill="none" stroke="black" d="M339.21,-835.9C294.31,-803.32 198.48,-733.77 155.69,-702.72"></path>
+</g>
+<!-- Categorizes -->
+<g id="node35" class="node">
+<title>Categorizes</title>
+<polygon fill="#ffffff" stroke="black" points="490.28,-704.19 435.46,-686.19 490.28,-668.19 545.11,-686.19 490.28,-704.19"></polygon>
+<text text-anchor="middle" x="490.28" y="-682.59" font-family="Arial" font-size="12.00">contains</text>
+</g>
+<!-- Topic&#45;&#45;Categorizes -->
+<g id="edge28" class="edge">
+<title>Topic--Categorizes</title>
+<path fill="none" stroke="black" d="M376.63,-835.9C401.98,-802.73 456.6,-731.27 479.66,-701.09"></path>
+<text text-anchor="middle" x="430.06" y="-769.37" font-family="Arial" font-size="10.00">1</text>
+</g>
+<!-- Achievement -->
+<g id="node5" class="node">
+<title>Achievement</title>
+<polygon fill="#fcfcfc" stroke="black" points="909.97,-532 824.6,-532 824.6,-496 909.97,-496 909.97,-532"></polygon>
+<text text-anchor="middle" x="867.28" y="-510.4" font-family="Arial" font-size="12.00">Achievement</text>
+</g>
+<!-- a_id -->
+<g id="node30" class="node">
+<title>a_id</title>
+<ellipse fill="none" stroke="black" cx="1003.28" cy="-346" rx="63.9" ry="18"></ellipse>
+<text text-anchor="start" x="961.26" y="-343.4" font-family="Arial" text-decoration="underline" font-size="12.00">achievement_id</text>
+</g>
+<!-- Achievement&#45;&#45;a_id -->
+<g id="edge22" class="edge">
+<title>Achievement--a_id</title>
+<path fill="none" stroke="black" d="M881.58,-495.55C907.91,-463.42 963.71,-395.3 989.58,-363.72"></path>
+</g>
+<!-- a_title -->
+<g id="node31" class="node">
+<title>a_title</title>
+<ellipse fill="none" stroke="black" cx="1139.28" cy="-346" rx="36" ry="18"></ellipse>
+<text text-anchor="middle" x="1139.28" y="-342.4" font-family="Arial" font-size="12.00">title</text>
+</g>
+<!-- Achievement&#45;&#45;a_title -->
+<g id="edge23" class="edge">
+<title>Achievement--a_title</title>
+<path fill="none" stroke="black" d="M895.88,-495.55C950.44,-462.25 1068.31,-390.31 1117.27,-360.44"></path>
+</g>
+<!-- a_desc -->
+<g id="node32" class="node">
+<title>a_desc</title>
+<ellipse fill="none" stroke="black" cx="733.28" cy="-346" rx="47.28" ry="18"></ellipse>
+<text text-anchor="middle" x="733.28" y="-342.4" font-family="Arial" font-size="12.00">description</text>
+</g>
+<!-- Achievement&#45;&#45;a_desc -->
+<g id="edge24" class="edge">
+<title>Achievement--a_desc</title>
+<path fill="none" stroke="black" d="M853.2,-495.55C827.26,-463.42 772.28,-395.3 746.78,-363.72"></path>
+</g>
+<!-- a_xp -->
+<g id="node33" class="node">
+<title>a_xp</title>
+<ellipse fill="none" stroke="black" cx="860.28" cy="-346" rx="43.46" ry="18"></ellipse>
+<text text-anchor="middle" x="860.28" y="-342.4" font-family="Arial" font-size="12.00">xp_bonus</text>
+</g>
+<!-- Achievement&#45;&#45;a_xp -->
+<g id="edge25" class="edge">
+<title>Achievement--a_xp</title>
+<path fill="none" stroke="black" d="M866.55,-495.55C865.2,-463.67 862.37,-396.36 861.02,-364.47"></path>
+</g>
+<!-- BasicUser -->
+<g id="node6" class="node">
+<title>BasicUser</title>
+<polygon fill="#fcfcfc" stroke="black" points="652.3,-1025.37 578.27,-1025.37 578.27,-989.37 652.3,-989.37 652.3,-1025.37"></polygon>
+<text text-anchor="middle" x="615.28" y="-1003.77" font-family="Arial" font-size="12.00">basic_user</text>
+</g>
+<!-- BasicUser&#45;&#45;User -->
+<g id="edge38" class="edge">
+<title>BasicUser--User</title>
+<path fill="none" stroke="black" stroke-width="1.5" d="M644.19,-989.05C689.84,-961.7 778.63,-908.49 829.34,-878.1"></path>
+<polygon fill="none" stroke="black" stroke-width="1.5" points="831.14,-881.11 837.91,-872.97 827.54,-875.11 831.14,-881.11"></polygon>
+</g>
+<!-- bu_limit -->
+<g id="node12" class="node">
+<title>bu_limit</title>
+<ellipse fill="none" stroke="black" cx="615.28" cy="-854.37" rx="64.74" ry="18"></ellipse>
+<text text-anchor="middle" x="615.28" y="-850.77" font-family="Arial" font-size="12.00">daily_word_limit</text>
+</g>
+<!-- BasicUser&#45;&#45;bu_limit -->
+<g id="edge4" class="edge">
+<title>BasicUser--bu_limit</title>
+<path fill="none" stroke="black" d="M615.28,-989.05C615.28,-959.92 615.28,-901.48 615.28,-872.49"></path>
+</g>
+<!-- bu_trial -->
+<g id="node13" class="node">
+<title>bu_trial</title>
+<ellipse fill="none" stroke="black" cx="247.28" cy="-854.37" rx="53.25" ry="18"></ellipse>
+<text text-anchor="middle" x="247.28" y="-850.77" font-family="Arial" font-size="12.00">is_trial_used</text>
+</g>
+<!-- BasicUser&#45;&#45;bu_trial -->
+<g id="edge5" class="edge">
+<title>BasicUser--bu_trial</title>
+<path fill="none" stroke="black" d="M577.97,-991.06C505.89,-961.48 348.56,-896.93 280.15,-868.86"></path>
+</g>
+<!-- PremiumUser -->
+<g id="node7" class="node">
+<title>PremiumUser</title>
+<polygon fill="#fcfcfc" stroke="black" points="1052.63,-1025.37 959.94,-1025.37 959.94,-989.37 1052.63,-989.37 1052.63,-1025.37"></polygon>
+<text text-anchor="middle" x="1006.28" y="-1003.77" font-family="Arial" font-size="12.00">premium_user</text>
+</g>
+<!-- PremiumUser&#45;&#45;User -->
+<g id="edge39" class="edge">
+<title>PremiumUser--User</title>
+<path fill="none" stroke="black" stroke-width="1.5" d="M990.34,-989.05C966.04,-962.65 919.58,-912.18 891.22,-881.37"></path>
+<polygon fill="none" stroke="black" stroke-width="1.5" points="893.93,-879.15 884.58,-874.16 888.78,-883.89 893.93,-879.15"></polygon>
+</g>
+<!-- pu_exp -->
+<g id="node14" class="node">
+<title>pu_exp</title>
+<ellipse fill="none" stroke="black" cx="1006.28" cy="-854.37" rx="75.82" ry="18"></ellipse>
+<text text-anchor="middle" x="1006.28" y="-850.77" font-family="Arial" font-size="12.00">subscription_expiry</text>
+</g>
+<!-- PremiumUser&#45;&#45;pu_exp -->
+<g id="edge6" class="edge">
+<title>PremiumUser--pu_exp</title>
+<path fill="none" stroke="black" d="M1006.28,-989.05C1006.28,-959.92 1006.28,-901.48 1006.28,-872.49"></path>
+</g>
+<!-- pu_plan -->
+<g id="node15" class="node">
+<title>pu_plan</title>
+<ellipse fill="none" stroke="black" cx="1161.28" cy="-854.37" rx="43.46" ry="18"></ellipse>
+<text text-anchor="middle" x="1161.28" y="-850.77" font-family="Arial" font-size="12.00">plan_type</text>
+</g>
+<!-- PremiumUser&#45;&#45;pu_plan -->
+<g id="edge7" class="edge">
+<title>PremiumUser--pu_plan</title>
+<path fill="none" stroke="black" d="M1024.06,-989.05C1054.44,-959.46 1115.87,-899.61 1145.11,-871.13"></path>
+</g>
+<!-- LearningSession -->
+<g id="node8" class="node">
+<title>LearningSession</title>
+<polygon fill="#fcfcfc" stroke="black" points="1437.31,-532 1331.25,-532 1331.25,-496 1437.31,-496 1437.31,-532"></polygon>
+<polygon fill="none" stroke="black" points="1441.31,-536 1327.25,-536 1327.25,-492 1441.31,-492 1441.31,-536"></polygon>
+<text text-anchor="middle" x="1384.28" y="-510.4" font-family="Arial" font-size="12.00">learning_session</text>
+</g>
+<!-- s_type -->
+<g id="node26" class="node">
+<title>s_type</title>
+<ellipse fill="none" stroke="black" cx="1529.28" cy="-346" rx="54.96" ry="18"></ellipse>
+<text text-anchor="middle" x="1529.28" y="-342.4" font-family="Arial" font-size="12.00">session_type</text>
+</g>
+<!-- LearningSession&#45;&#45;s_type -->
+<g id="edge18" class="edge">
+<title>LearningSession--s_type</title>
+<path fill="none" stroke="black" d="M1402.94,-491.64C1432.16,-458.19 1488.11,-394.14 1514.64,-363.77"></path>
+</g>
+<!-- s_start -->
+<g id="node27" class="node">
+<title>s_start</title>
+<ellipse fill="none" stroke="black" cx="1664.28" cy="-346" rx="43.87" ry="18"></ellipse>
+<text text-anchor="middle" x="1664.28" y="-342.4" font-family="Arial" font-size="12.00">start_time</text>
+</g>
+<!-- LearningSession&#45;&#45;s_start -->
+<g id="edge19" class="edge">
+<title>LearningSession--s_start</title>
+<path fill="none" stroke="black" d="M1420.32,-491.64C1478.21,-457.31 1590.47,-390.76 1639.9,-361.45"></path>
+</g>
+<!-- s_end -->
+<g id="node28" class="node">
+<title>s_end</title>
+<ellipse fill="none" stroke="black" cx="1253.28" cy="-346" rx="41.75" ry="18"></ellipse>
+<text text-anchor="middle" x="1253.28" y="-342.4" font-family="Arial" font-size="12.00">end_time</text>
+</g>
+<!-- LearningSession&#45;&#45;s_end -->
+<g id="edge20" class="edge">
+<title>LearningSession--s_end</title>
+<path fill="none" stroke="black" d="M1367.43,-491.64C1340.89,-458.01 1289.95,-393.47 1266.14,-363.29"></path>
+</g>
+<!-- s_count -->
+<g id="node29" class="node">
+<title>s_count</title>
+<ellipse fill="none" stroke="black" cx="1384.28" cy="-346" rx="53.68" ry="18"></ellipse>
+<text text-anchor="middle" x="1384.28" y="-342.4" font-family="Arial" font-size="12.00">words_count</text>
+</g>
+<!-- LearningSession&#45;&#45;s_count -->
+<g id="edge21" class="edge">
+<title>LearningSession--s_count</title>
+<path fill="none" stroke="black" d="M1384.28,-491.64C1384.28,-458.36 1384.28,-394.81 1384.28,-364.25"></path>
+</g>
+<!-- Derives&#45;&#45;Word -->
+<g id="edge27" class="edge">
+<title>Derives--Word</title>
+<path fill="none" stroke="black" d="M515.58,-33.76C495.89,-58.58 458.28,-106 458.28,-106 458.28,-106 406.29,-141.45 373.8,-163.6"></path>
+<text text-anchor="middle" x="470.89" y="-97" font-family="Arial" font-size="10.00">N</text>
+</g>
+<!-- Categorizes&#45;&#45;Wordlist -->
+<g id="edge29" class="edge">
+<title>Categorizes--Wordlist</title>
+<path fill="none" stroke="black" d="M490.28,-667.93C490.28,-635.31 490.28,-564.95 490.28,-532.3"></path>
+<text text-anchor="middle" x="493.89" y="-597" font-family="Arial" font-size="10.00">N</text>
+</g>
+<!-- Includes&#45;&#45;Word -->
+<g id="edge31" class="edge">
+<title>Includes--Word</title>
+<path fill="none" stroke="black" d="M348.28,-327.66C348.28,-296.48 348.28,-231.3 348.28,-200.21"></path>
+<text text-anchor="middle" x="351.89" y="-261" font-family="Arial" font-size="10.00">N</text>
+</g>
+<!-- Earns&#45;&#45;Achievement -->
+<g id="edge33" class="edge">
+<title>Earns--Achievement</title>
+<path fill="none" stroke="black" d="M867.28,-667.93C867.28,-635.31 867.28,-564.95 867.28,-532.3"></path>
+<text text-anchor="middle" x="870.89" y="-597" font-family="Arial" font-size="10.00">N</text>
+</g>
+<!-- Studies&#45;&#45;Wordlist -->
+<g id="edge35" class="edge">
+<title>Studies--Wordlist</title>
+<path fill="none" stroke="black" d="M619.3,-671.83C594.16,-641.27 532.46,-566.27 504.49,-532.26"></path>
+<text text-anchor="middle" x="568.89" y="-597" font-family="Arial" font-size="10.00">N</text>
+</g>
+<!-- Performs&#45;&#45;LearningSession -->
+<g id="edge37" class="edge">
+<title>Performs--LearningSession</title>
+<path fill="none" stroke="black" d="M1045.17,-672.25C1107.98,-643.13 1261.06,-572.14 1338.22,-536.36"></path>
+<text text-anchor="middle" x="1214.89" y="-597" font-family="Arial" font-size="10.00">N</text>
+</g>
+</g>
+</g></svg>
