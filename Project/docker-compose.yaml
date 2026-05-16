@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "443:443"      # only expose what's needed
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"    # or keep internal only if frontend proxies to it
+    depends_on:
+      - mariadb
+      - mongodb
+    environment:
+      - DB_HOST=mariadb
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
+      - DB_NAME=language_app
+      - MONGO_HOST=mongodb
+
+  mariadb:
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=language_app
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppassword
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # NO bind mounts to local code — remove before submitting
+
+  mongodb:
+    image: mongo:6
+    # no external port needed unless for debugging
