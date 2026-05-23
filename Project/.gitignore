@@ -1,0 +1,15 @@
+# environment files
+.env
+backend/.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker volumes
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
