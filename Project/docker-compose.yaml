@@ -1,26 +1,29 @@
-version: '3.8'
-
 services:
+
   frontend:
     build: ./frontend
+    volumes:
+      - ./frontend/certs:/etc/nginx/certs:ro
     ports:
-      - "443:443"      # only expose what's needed
+      - "443:443"
     depends_on:
       - backend
 
   backend:
     build: ./backend
     ports:
-      - "8080:8080"    # or keep internal only if frontend proxies to it
+      - "8000:8000"
     depends_on:
-      - mariadb
-      - mongodb
+      mariadb:
+        condition: service_healthy
     environment:
       - DB_HOST=mariadb
+      - DB_PORT=3306
       - DB_USER=appuser
       - DB_PASSWORD=apppassword
       - DB_NAME=language_app
       - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
 
   mariadb:
     image: mariadb:10.11
@@ -31,8 +34,16 @@ services:
       - MYSQL_PASSWORD=apppassword
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    # NO bind mounts to local code — remove before submitting
+    expose:
+      - "3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mongodb:
     image: mongo:6
-    # no external port needed unless for debugging
+    expose:
+      - "27017"
