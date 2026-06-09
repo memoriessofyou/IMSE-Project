@@ -85,6 +85,20 @@ def get_all_wordlists():
     cursor.execute("SELECT * FROM Wordlists")
     return cursor.fetchall()
 
+@app.get("/api/wordlist/{id}")
+def get_specific_wordlist(id: int):
+    cursor = get_db().cursor()
+    select_ms = "SELECT * FROM Wordlists WHERE wordlist_id = %s"
+    cursor.execute( select_ms, (id,))
+    return cursor.fetchall()
+
+@app.get("/api/wordlist/{id}/words")
+def get_wordlist_words(id: int):
+    cursor = get_db().cursor()
+    select_ms = "SELECT * FROM Wordlist_Words WHERE wordlist_id = %s"
+    cursor.execute( select_ms, (id,))
+    return cursor.fetchall()
+
 @app.get("/api/topics")
 def get_all_topics():
     cursor = get_db().cursor()
@@ -95,13 +109,33 @@ def get_all_topics():
 
 # use cases endpoint
 
+# get all words assigned to a user
 @app.get("/api/users/{id}/words")
-def get_words_from_user():
-    return
+def get_words_from_user(id: int):
+    cursor = get_db().cursor()
+    select_ms = """
+        SELECT w.word_id, w.word, w.translation, uw.is_new, uw.correct_count,
+                            uw.mistakes_count, uw.next_review, uw.last_reviewed,
+                            uw.problematic
+        FROM User_Words uw
+        JOIN Words w ON w.word_id = uw.word_id
+        WHERE uw.user_id = %s
+        """
+    cursor.execute(select_ms, (id,))
+    return cursor.fetchall()
 
+# get all wordlists assigned to a user
 @app.get("/api/users/{id}/wordlist")
-def get_wordlist_from_user():
-    return
+def get_wordlist_from_user(id: int):
+    cursor = get_db().cursor()
+    select_ms = """
+        SELECT wl.wordlist_id, wl.name
+        FROM User_Wordlists uw
+        JOIN Wordlists wl ON wl.wordlist_id = uw.wordlist_id
+        WHERE uw.user_id = %s
+        """
+    cursor.execute(select_ms, (id,))
+    return cursor.fetchall()
 
 
 # SEED POINT TO START WORKING WITH REAL DATA 
@@ -296,7 +330,60 @@ def assign_word_to_wordlist(request: AssignWordToWordListRequest):
         raise HTTPException(status_code= 500, detail = e)
     finally:
         db.close()
-        
+
+
+# Anastasiia Use Case: Assign words to a user
+class AssignWordlistToUserRequest(BaseModel):
+    user_id : int
+    wordlist_id : int
+    
+# assigns a wordlist and all words it contains to a user
+@app.post("/api/assign-wordlist-to-user")
+def assign_wordlist_to_user(request: AssignWordlistToUserRequest):
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            # checking if user exists
+            cursor.execute(f"SELECT * FROM Users WHERE user_id = %(user_id)s",
+                           {"user_id": request.user_id})
+            if not cursor.fetchone():
+                raise HTTPException(status_code= 400, detail= "USER NOT FOUND")
+            
+            # checking if worlist exists
+            cursor.execute(f"SELECT * FROM Wordlists WHERE wordlist_id = %(wordlist_id)s", {"wordlist_id": request.wordlist_id})
+            if not cursor.fetchone():
+                raise HTTPException(status_code= 400, detail= "WORDLIST NOT FOUND")
+            
+            # checking if the wordlist has at least 1 word assigned
+            cursor.execute(f"SELECT * FROM Wordlist_Words WHERE wordlist_id = %(wordlist_id)s LIMIT 1", {"wordlist_id": request.wordlist_id})
+            if not cursor.fetchone():
+                raise HTTPException(status_code= 400, detail= "WORDLIST IS EMPTY")
+                        
+            #--- PRE-CHECK COMPLETE ---#    
+
+            # assign wordlist to the user
+            cursor.execute(f"INSERT IGNORE INTO User_Wordlists (user_id, wordlist_id) VALUES (%(user_id)s, %(wordlist_id)s)", 
+                           {"user_id": request.user_id, "wordlist_id": request.wordlist_id})
+            
+            # assign relevant words to the user
+            cursor.execute(
+                f"""INSERT IGNORE INTO User_Words (user_id, word_id)
+                    SELECT %(user_id)s, wl.word_id 
+                    FROM Wordlist_Words wl 
+                    JOIN Words w ON wl.word_id = w.word_id 
+                    WHERE wl.wordlist_id = %(wordlist_id)s """, 
+                           {"user_id": request.user_id, "wordlist_id": request.wordlist_id})
+            
+            # commit the changes
+            db.commit()
+            return {"msg": "Wordlist assigned to user successfully" }
+            
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code= 500, detail = str(e))
+    finally:
+        db.close()
+
         
         
     
