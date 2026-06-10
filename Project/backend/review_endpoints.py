@@ -30,12 +30,10 @@ def start_review_session(request: ReviewStartRequest):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            # Check if user exists
             cursor.execute("SELECT * FROM Users WHERE user_id = %s", (request.user_id,))
             if not cursor.fetchone():
                 raise HTTPException(status_code=404, detail="User not found")
-            
-            # Check if user has words assigned and pending review
+
             cursor.execute("""
                 SELECT COUNT(*) as count 
                 FROM User_Words 
@@ -45,7 +43,6 @@ def start_review_session(request: ReviewStartRequest):
             if res['count'] == 0:
                 return {"message": "No words for today! Come back tomorrow :)"}
 
-            # Create learning session
             cursor.execute(
                 "INSERT INTO Learning_Sessions (user_id, session_type, start_time, words_count) VALUES (%s, %s, %s, %s)",
                 (request.user_id, "Word Review", datetime.now(), 0)
@@ -86,7 +83,7 @@ def submit_review_result(request: ReviewSubmitRequest):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            # Get current word status
+
             cursor.execute(
                 "SELECT * FROM User_Words WHERE user_id = %s AND word_id = %s",
                 (request.user_id, request.word_id)
@@ -95,7 +92,6 @@ def submit_review_result(request: ReviewSubmitRequest):
             if not uw:
                 raise HTTPException(status_code=404, detail="User-Word relationship not found")
 
-            # Spaced repetition logic
             current_interval = uw['interval'] or 0
             if request.is_correct:
                 new_interval = max(1, current_interval * 2) if current_interval > 0 else 1
@@ -108,7 +104,6 @@ def submit_review_result(request: ReviewSubmitRequest):
 
             next_review_date = datetime.now() + timedelta(days=new_interval)
 
-            # Update User_Words
             cursor.execute("""
                 UPDATE User_Words 
                 SET problematic = %s, 
@@ -131,9 +126,6 @@ def submit_review_result(request: ReviewSubmitRequest):
                 request.user_id, 
                 request.word_id
             ))
-
-            # Update Word table (as per prompt: "correct_count, mistake_count in Word table are incremented")
-            # First check if columns exist in Words table to avoid errors if they are not yet added
             cursor.execute("SHOW COLUMNS FROM Words LIKE 'correct_count'")
             if cursor.fetchone():
                 cursor.execute("""
@@ -147,7 +139,6 @@ def submit_review_result(request: ReviewSubmitRequest):
                     request.word_id
                 ))
 
-            # Update learning_session
             cursor.execute("""
                 UPDATE Learning_Sessions 
                 SET words_count = words_count + 1 
@@ -167,7 +158,6 @@ def get_review_analytics(user_id: int):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            # Get stats for the user
             cursor.execute("""
                 SELECT 
                     COUNT(*) as total_assigned,
@@ -178,8 +168,7 @@ def get_review_analytics(user_id: int):
                 WHERE user_id = %s
             """, (user_id,))
             stats = cursor.fetchone()
-            
-            # Get recent sessions
+
             cursor.execute("""
                 SELECT words_count, start_time, end_time 
                 FROM Learning_Sessions 
@@ -202,8 +191,6 @@ def get_session_report(user_id: int):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            # This query follows the logic provided by the user to get detailed word-level progress
-            # from the most recent learning session.
             sql = """
                 SELECT 
                     u.username,

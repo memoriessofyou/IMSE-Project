@@ -219,7 +219,7 @@
             users.forEach(u => {
                 const option = document.createElement('option');
                 option.value = u.user_id;
-                option.textContent = u.username;
+                option.textContent = `${u.username} (${u.user_type})`;
                 select.appendChild(option);
             });
         } catch (err) {
