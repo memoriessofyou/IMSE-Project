@@ -4,7 +4,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pymysql
-import pymysql.cursors
 from dotenv import load_dotenv
 import random
 from datetime import datetime, timedelta
@@ -14,10 +13,14 @@ import os
 
 load_dotenv()
 
+from review_endpoints import router as review_router
+
 app = FastAPI(
     title = "Norwegian Learning App",
     description = "Group Project for the course IMSE"
 )
+
+app.include_router(review_router)
 
 # to let frontend connect with backend we use a middleware
 app.add_middleware(
@@ -27,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# connecting the database 
+# connecting the database
 
 def get_db():
     # get the db based on the .env file
@@ -49,15 +52,15 @@ def get_mongo():
 
 @app.get("/api/words")
 def get_all_words():
-    
+
     try:
         cursor = get_db().cursor()
         cursor.execute("SELECT * FROM Words")
         return cursor.fetchall()
-        
+
     except Exception as e:
         print(f"Database connection error: {e}")
-    
+
 
 @app.get("/api/words/{id}")
 def get_specific_word(id: int):
@@ -138,7 +141,7 @@ def get_wordlist_from_user(id: int):
     return cursor.fetchall()
 
 
-# SEED POINT TO START WORKING WITH REAL DATA 
+# SEED POINT TO START WORKING WITH REAL DATA
 
 @app.post("/api/seed")
 def seed_database():
@@ -278,53 +281,53 @@ def seed_database():
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
-        
-        
-        
+
+
+
 # Ines Use Case: Assign word to wordlist
 
 class AssignWordToWordListRequest(BaseModel):
     user_id : int
     word_id : int
     wordlist_id : int
-    
+
 # resets a difficult word for a user and re assigns it to her/his wordlist
 @app.post("/api/assign-word-to-wordlist")
 def assign_word_to_wordlist(request: AssignWordToWordListRequest):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            
-            
+
+
             # first we see if the user exists
             cursor.execute(f"SELECT * FROM Users WHERE user_id = {request.user_id}")
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "USER NOT FOUND")
-            
-            
+
+
             # we see if the word is in the DB
             cursor.execute(f"SELECT * FROM Words WHERE word_id = {request.word_id}")
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "WORD NOT FOUND")
-            
+
             # we check for the wordlist
             cursor.execute(f"SELECT * FROM Wordlists WHERE wordlist_id = {request.wordlist_id}")
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "WORDLIST NOT FOUND")
-            
+
             # if everything worked well we can re-assign the word to the word list
-            
+
             # we update the users progress on that word
             cursor.execute(f"UPDATE User_Words SET is_new = TRUE, correct_count = 0 WHERE user_id = {request.user_id} AND word_id = {request.word_id}")
-            
+
             # we re-link the word to the wordlist
-            
+
             cursor.execute(f"INSERT INTO Wordlist_Words(wordlist_id, word_id) VALUES {request.wordlist_id, request.word_id}")
-            
+
             # commit the changes
             db.commit()
             return {"msg": "Word  re-assigned to the users wordlist successfully" }
-            
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code= 500, detail = e)
@@ -336,7 +339,7 @@ def assign_word_to_wordlist(request: AssignWordToWordListRequest):
 class AssignWordlistToUserRequest(BaseModel):
     user_id : int
     wordlist_id : int
-    
+
 # assigns a wordlist and all words it contains to a user
 @app.post("/api/assign-wordlist-to-user")
 def assign_wordlist_to_user(request: AssignWordlistToUserRequest):
@@ -348,43 +351,39 @@ def assign_wordlist_to_user(request: AssignWordlistToUserRequest):
                            {"user_id": request.user_id})
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "USER NOT FOUND")
-            
+
             # checking if worlist exists
             cursor.execute(f"SELECT * FROM Wordlists WHERE wordlist_id = %(wordlist_id)s", {"wordlist_id": request.wordlist_id})
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "WORDLIST NOT FOUND")
-            
+
             # checking if the wordlist has at least 1 word assigned
             cursor.execute(f"SELECT * FROM Wordlist_Words WHERE wordlist_id = %(wordlist_id)s LIMIT 1", {"wordlist_id": request.wordlist_id})
             if not cursor.fetchone():
                 raise HTTPException(status_code= 400, detail= "WORDLIST IS EMPTY")
-                        
-            #--- PRE-CHECK COMPLETE ---#    
+
+            #--- PRE-CHECK COMPLETE ---#
 
             # assign wordlist to the user
-            cursor.execute(f"INSERT IGNORE INTO User_Wordlists (user_id, wordlist_id) VALUES (%(user_id)s, %(wordlist_id)s)", 
+            cursor.execute(f"INSERT IGNORE INTO User_Wordlists (user_id, wordlist_id) VALUES (%(user_id)s, %(wordlist_id)s)",
                            {"user_id": request.user_id, "wordlist_id": request.wordlist_id})
-            
+
             # assign relevant words to the user
             cursor.execute(
                 f"""INSERT IGNORE INTO User_Words (user_id, word_id)
                     SELECT %(user_id)s, wl.word_id 
                     FROM Wordlist_Words wl 
                     JOIN Words w ON wl.word_id = w.word_id 
-                    WHERE wl.wordlist_id = %(wordlist_id)s """, 
+                    WHERE wl.wordlist_id = %(wordlist_id)s """,
                            {"user_id": request.user_id, "wordlist_id": request.wordlist_id})
-            
+
             # commit the changes
             db.commit()
             return {"msg": "Wordlist assigned to user successfully" }
-            
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code= 500, detail = str(e))
     finally:
         db.close()
-
-        
-        
-    
 
