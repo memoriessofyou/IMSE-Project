@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import random
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+from pymongo import MongoClient
 
 import os
 
@@ -27,6 +28,159 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ------------------------ Mongo ----------------------------------
+def get_mongo():
+    client = MongoClient(
+        host=os.getenv("MONGO_HOST", "mongodb"),
+        port=int(os.getenv("MONGO_PORT", 27017))
+    )
+    return client["language_app"]
+
+
+# Mongo migration endpoint
+
+@app.post("/api/migrate")
+def migrate_to_mongodb():
+    db = get_db()
+    mongo = get_mongo()
+
+    try:
+        
+        mongo.users.drop()
+        mongo.words.drop()
+        mongo.wordlists.drop()
+        mongo.topics.drop()
+        mongo.sessions.drop()
+
+        with db.cursor() as cursor:
+
+            
+            cursor.execute("SELECT * FROM Topics")
+            topics = cursor.fetchall()
+            if topics:
+                mongo.topics.insert_many([
+                    {
+                        "_id": t["topic_id"],
+                        "name": t["name"],
+                        "description": t["description"]
+                    }
+                    for t in topics
+                ])
+
+           
+            cursor.execute("SELECT * FROM Words")
+            words = cursor.fetchall()
+            if words:
+                mongo.words.insert_many([
+                    {
+                        "_id": w["word_id"],
+                        "word": w["word"],
+                        "translation": w["translation"],
+                        "difficulty_level": w["difficulty_level"],
+                        "base_word_id": w["base_word_id"]
+                    }
+                    for w in words
+                ])
+
+            
+            cursor.execute("""
+                SELECT wl.*, t.name as topic_name
+                FROM Wordlists wl
+                JOIN Topics t ON wl.topic_id = t.topic_id
+            """)
+            wordlists = cursor.fetchall()
+
+            for wl in wordlists:
+                cursor.execute("""
+                    SELECT word_id FROM Wordlist_Words
+                    WHERE wordlist_id = %s
+                """, (wl["wordlist_id"],))
+                word_ids = [r["word_id"] for r in cursor.fetchall()]
+
+                mongo.wordlists.insert_one({
+                    "_id": wl["wordlist_id"],
+                    "name": wl["name"],
+                    "description": wl["description"],
+                    "difficulty_level": wl["difficulty_level"],
+                    "topic_id": wl["topic_id"],
+                    "topic_name": wl["topic_name"],
+                    "words": word_ids
+                })
+
+            
+            cursor.execute("SELECT * FROM Users")
+            users = cursor.fetchall()
+
+            for user in users:
+                uid = user["user_id"]
+
+                # get wordlists assigned to this user
+                cursor.execute("""
+                    SELECT wordlist_id FROM User_Wordlists
+                    WHERE user_id = %s
+                """, (uid,))
+                user_wordlist_ids = [
+                    r["wordlist_id"] for r in cursor.fetchall()
+                ]
+
+                # get word progress for this user
+                cursor.execute("""
+                    SELECT uw.*, w.word, w.translation
+                    FROM User_Words uw
+                    JOIN Words w ON uw.word_id = w.word_id
+                    WHERE uw.user_id = %s
+                """, (uid,))
+                user_words = cursor.fetchall()
+
+                words_embedded = [
+                    {
+                        "word_id": uw["word_id"],
+                        "word": uw["word"],
+                        "translation": uw["translation"],
+                        "is_new": bool(uw["is_new"]),
+                        "problematic": bool(uw["problematic"]),
+                        "correct_count": uw["correct_count"],
+                        "mistakes_count": uw["mistakes_count"],
+                        "interval": uw["interval"],
+                        "next_review": str(uw["next_review"]) if uw["next_review"] else None,
+                        "last_reviewed": str(uw["last_reviewed"]) if uw["last_reviewed"] else None,
+                        "last_mistake": str(uw["last_mistake"]) if uw["last_mistake"] else None
+                    }
+                    for uw in user_words
+                ]
+
+                mongo.users.insert_one({
+                    "_id": uid,
+                    "username": user["username"],
+                    "total_xp": user["total_xp"],
+                    "wordlists": user_wordlist_ids,
+                    "words": words_embedded
+                })
+
+           
+            cursor.execute("SELECT * FROM Learning_Sessions")
+            sessions = cursor.fetchall()
+            if sessions:
+                mongo.sessions.insert_many([
+                    {
+                        "_id": s["session_id"],
+                        "user_id": s["user_id"],
+                        "session_type": s["session_type"],
+                        "start_time": str(s["start_time"]) if s["start_time"] else None,
+                        "end_time": str(s["end_time"]) if s["end_time"] else None,
+                        "words_count": s["words_count"]
+                    }
+                    for s in sessions
+                ])
+
+        return {"message": "Migration completed successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
 # connecting the database 
 
 def get_db():
@@ -39,11 +193,6 @@ def get_db():
         database=os.getenv("DB_NAME", "language_app"),
         cursorclass=pymysql.cursors.DictCursor
     )
-
-def get_mongo():
-    # get mongo based on .env file
-    return
-
 
 
 
@@ -156,6 +305,7 @@ def seed_database():
             ]:
                 cursor.execute(f"DELETE FROM {table}")
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+            db.commit()
             topics = [
                 ("Food & Drink", "Common food and drink vocabulary"),
                 ("Travel", "Words for getting around"),
@@ -167,6 +317,7 @@ def seed_database():
                 "INSERT INTO Topics (name, description) VALUES (%s, %s)",
                 topics
             )
+            db.commit()
 
             words = [
                 ("hei", "hello", 1, None),
@@ -196,6 +347,7 @@ def seed_database():
                    VALUES (%s, %s, %s, %s)""",
                 words
             )
+            db.commit()
 
             wordlists = [
                 ("Basics", "Essential Norwegian phrases", 1, 1),
@@ -209,6 +361,7 @@ def seed_database():
                    VALUES (%s, %s, %s, %s)""",
                 wordlists
             )
+            db.commit()
 
             wordlist_words = [
                 (1, 1), (1, 2), (1, 3), (1, 13), (1, 14),
@@ -220,7 +373,7 @@ def seed_database():
                 "INSERT INTO Wordlist_Words (wordlist_id, word_id) VALUES (%s, %s)",
                 wordlist_words
             )
-
+            db.commit()
             usernames = [
                 "anna_b", "ines_t", "anastasiia_k",
                 "erik_n", "sofia_l", "max_m",
@@ -231,6 +384,7 @@ def seed_database():
                     "INSERT INTO Users (username, total_xp) VALUES (%s, %s)",
                     (username, random.randint(0, 500))
                 )
+            db.commit()
             cursor.execute("SELECT user_id FROM Users")
             user_ids = [row["user_id"] for row in cursor.fetchall()]
 
@@ -294,43 +448,47 @@ def assign_word_to_wordlist(request: AssignWordToWordListRequest):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            
-            
-            # first we see if the user exists
-            cursor.execute(f"SELECT * FROM Users WHERE user_id = {request.user_id}")
+
+            # check user exists
+            cursor.execute("SELECT * FROM Users WHERE user_id = %s", (request.user_id,))
             if not cursor.fetchone():
-                raise HTTPException(status_code= 400, detail= "USER NOT FOUND")
-            
-            
-            # we see if the word is in the DB
-            cursor.execute(f"SELECT * FROM Words WHERE word_id = {request.word_id}")
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # check word exists
+            cursor.execute("SELECT * FROM Words WHERE word_id = %s", (request.word_id,))
             if not cursor.fetchone():
-                raise HTTPException(status_code= 400, detail= "WORD NOT FOUND")
-            
-            # we check for the wordlist
-            cursor.execute(f"SELECT * FROM Wordlists WHERE wordlist_id = {request.wordlist_id}")
+                raise HTTPException(status_code=404, detail="Word not found")
+
+            # check wordlist exists
+            cursor.execute("SELECT * FROM Wordlists WHERE wordlist_id = %s", (request.wordlist_id,))
             if not cursor.fetchone():
-                raise HTTPException(status_code= 400, detail= "WORDLIST NOT FOUND")
-            
-            # if everything worked well we can re-assign the word to the word list
-            
-            # we update the users progress on that word
-            cursor.execute(f"UPDATE User_Words SET is_new = TRUE, correct_count = 0 WHERE user_id = {request.user_id} AND word_id = {request.word_id}")
-            
-            # we re-link the word to the wordlist
-            
-            cursor.execute(f"INSERT INTO Wordlist_Words(wordlist_id, word_id) VALUES {request.wordlist_id, request.word_id}")
-            
-            # commit the changes
+                raise HTTPException(status_code=404, detail="Wordlist not found")
+
+            # reset word progress
+            cursor.execute("""
+                UPDATE User_Words
+                SET is_new = TRUE,
+                    correct_count = 0,
+                    `interval` = 0
+                WHERE user_id = %s AND word_id = %s
+            """, (request.user_id, request.word_id))
+
+            # re-link word to wordlist
+            cursor.execute("""
+                INSERT IGNORE INTO Wordlist_Words (wordlist_id, word_id)
+                VALUES (%s, %s)
+            """, (request.wordlist_id, request.word_id))
+
             db.commit()
-            return {"msg": "Word  re-assigned to the users wordlist successfully" }
-            
+            return {"message": "Word re-assigned to wordlist successfully"}
+
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code= 500, detail = e)
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
-
 
 # Anastasiia Use Case: Assign words to a user
 class AssignWordlistToUserRequest(BaseModel):
