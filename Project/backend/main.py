@@ -316,6 +316,56 @@ def get_wordlist_from_user(id: int):
 
 from db_generator import generate_data
 
+from typing import Optional
+
+@app.get("/api/admin/session-logs")
+def get_session_logs(user_id: Optional[int] = None, date: Optional[str] = None):
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            query = """
+                SELECT
+                    u.username,
+                    DATE(ls.start_time) AS session_date,
+                    t.name AS topic_name,
+                    COUNT(DISTINCT w.word_id) AS words_practiced,
+                    SUM(uw.correct_count) AS total_correct,
+                    SUM(uw.mistakes_count) AS total_mistakes
+                FROM Users u
+                JOIN Learning_Sessions ls ON u.user_id = ls.user_id
+                JOIN User_Words uw ON u.user_id = uw.user_id AND DATE(uw.last_reviewed) = DATE(ls.start_time)
+                JOIN Words w ON uw.word_id = w.word_id
+                JOIN Wordlist_Words ww ON w.word_id = ww.word_id
+                JOIN Wordlists wl ON ww.wordlist_id = wl.wordlist_id
+                JOIN Topics t ON wl.topic_id = t.topic_id
+                WHERE 1=1
+            """
+            params = []
+            if user_id:
+                query += " AND u.user_id = %s "
+                params.append(user_id)
+            if date:
+                query += " AND DATE(ls.start_time) = %s "
+                params.append(date)
+                
+            query += """
+                GROUP BY u.user_id, u.username, DATE(ls.start_time), t.topic_id, t.name
+                ORDER BY session_date DESC, u.username ASC
+                LIMIT 200
+            """
+            cursor.execute(query, tuple(params))
+            
+            # Format dates for JSON serialization
+            results = cursor.fetchall()
+            for row in results:
+                if row['session_date']:
+                    row['session_date'] = row['session_date'].strftime('%Y-%m-%d')
+            return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
 @app.post("/api/seed")
 def seed_database():
     success = generate_data()

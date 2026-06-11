@@ -118,37 +118,44 @@ def generate_data():
                         (u_id, 20, random.choice([1, 0]))
                     )
 
-                #random progress/sescions
-                num_words = random.randint(15, 40)
-                user_word_sample = random.sample(word_ids, num_words)
-
-                for _ in range(random.randint(1, 4)):
-                    session_date = datetime.now() - timedelta(days=random.randint(1, 30))
-                    cursor.execute(
-                        "INSERT INTO Learning_Sessions (user_id, session_type, start_time, end_time, words_count) VALUES (%s, %s, %s, %s, %s)",
-                        (u_id, "Word Review", session_date, session_date + timedelta(minutes=10), random.randint(5, 15))
-                    )
-
-                last_session_start = datetime.now() - timedelta(minutes=random.randint(5, 15))
-                cursor.execute(
-                    "INSERT INTO Learning_Sessions (user_id, session_type, start_time, end_time, words_count) VALUES (%s, %s, %s, %s, %s)",
-                    (u_id, "Word Review", last_session_start, datetime.now(), num_words)
-                )
-                
-                for word_id in user_word_sample:
-                    correct = random.randint(0, 30)
-                    mistakes = random.randint(0, 15)
-                    last_reviewed = last_session_start + timedelta(seconds=random.randint(1, 60))
-                    next_review = datetime.now() + timedelta(days=random.randint(0, 10))
+                # Generate sessions and word progress ONLY for non-admin users
+                if user_type != "Admin":
+                    # Generate multiple sessions spread over the last 45 days (including today)
+                    num_words = random.randint(20, 50)
+                    user_word_sample = random.sample(word_ids, num_words)
                     
-                    cursor.execute("""
-                        INSERT INTO User_Words 
-                        (user_id, word_id, is_new, correct_count, mistakes_count, last_reviewed, next_review, problematic, `interval`)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        u_id, word_id, 0, correct, mistakes, last_reviewed, next_review,
-                        1 if mistakes > 5 else 0, random.randint(1, 20)
-                    ))
+                    sessions = []
+                    for _ in range(random.randint(3, 8)):
+                        session_date = datetime.now() - timedelta(days=random.randint(0, 45), hours=random.randint(0, 23))
+                        sessions.append(session_date)
+                    
+                    # Sort chronologically so MAX(session_id) represents the most recent
+                    sessions.sort()
+
+                    for sess_date in sessions:
+                        cursor.execute(
+                            "INSERT INTO Learning_Sessions (user_id, session_type, start_time, end_time, words_count) VALUES (%s, %s, %s, %s, %s)",
+                            (u_id, "Word Review", sess_date, sess_date + timedelta(minutes=15), random.randint(5, 15))
+                        )
+                    
+                    # Distribute words randomly among all generated sessions
+                    for word_id in user_word_sample:
+                        correct = random.randint(0, 30)
+                        mistakes = random.randint(0, 15)
+                        
+                        # Randomly pick which session this word was LAST reviewed in
+                        chosen_session = random.choice(sessions)
+                        last_reviewed = chosen_session + timedelta(seconds=random.randint(1, 60))
+                        next_review = datetime.now() + timedelta(days=random.randint(-2, 10))
+                        
+                        cursor.execute("""
+                            INSERT INTO User_Words 
+                            (user_id, word_id, is_new, correct_count, mistakes_count, last_reviewed, next_review, problematic, `interval`)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            u_id, word_id, 0, correct, mistakes, last_reviewed, next_review,
+                            1 if mistakes > 5 else 0, random.randint(1, 20)
+                        ))
 
             db.commit()
             return True
