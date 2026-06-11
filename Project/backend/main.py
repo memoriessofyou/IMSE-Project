@@ -280,39 +280,6 @@ def get_all_topics():
 
 
 
-@app.get("/api/users/{id}/words")
-def get_words_from_user(id: int):
-    db = get_db()
-    try:
-        with db.cursor() as cursor:
-            cursor.execute("""
-                SELECT w.word_id, w.word, w.translation, uw.is_new,
-                       uw.correct_count, uw.mistakes_count, uw.next_review,
-                       uw.last_reviewed, uw.problematic
-                FROM User_Words uw
-                JOIN Words w ON w.word_id = uw.word_id
-                WHERE uw.user_id = %s
-            """, (id,))
-            return cursor.fetchall()
-    finally:
-        db.close()
-
-@app.get("/api/users/{id}/wordlist")
-def get_wordlist_from_user(id: int):
-    db = get_db()
-    try:
-        with db.cursor() as cursor:
-            cursor.execute("""
-                SELECT wl.wordlist_id, wl.name
-                FROM User_Wordlists uw
-                JOIN Wordlists wl ON wl.wordlist_id = uw.wordlist_id
-                WHERE uw.user_id = %s
-            """, (id,))
-            return cursor.fetchall()
-    finally:
-        db.close()
-
-
 
 from db_generator import generate_data
 
@@ -599,3 +566,159 @@ def assign_wordlist_to_user(request: AssignWordlistToUserRequest):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+
+# Anastasiia SQL report
+@app.get("/api/users/{id}/words")
+def get_words_from_user(id: int):
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT w.word_id, w.word, w.translation, uw.is_new,
+                       uw.correct_count, uw.mistakes_count, uw.next_review,
+                       uw.last_reviewed, uw.problematic
+                FROM User_Words uw
+                JOIN Words w ON w.word_id = uw.word_id
+                WHERE uw.user_id = %s
+            """, (id,))
+            return cursor.fetchall()
+    finally:
+        db.close()
+
+@app.get("/api/users/{id}/wordlist")
+def get_wordlist_from_user(id: int):
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT wl.wordlist_id, wl.name
+                FROM User_Wordlists uw
+                JOIN Wordlists wl ON wl.wordlist_id = uw.wordlist_id
+                WHERE uw.user_id = %s
+            """, (id,))
+            return cursor.fetchall()
+    finally:
+        db.close()
+
+
+#Anastasiia MongoDB Use case
+@app.post("/api/mongo/assign-wordlist-to-user")
+def mongo_assign_worlist_to_user(request: AssignWordlistToUserRequest):
+    mongo = get_mongo()
+
+    try:
+        #prechecks
+        user = mongo.users.find_one({"_id": request.user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        wordlist = mongo.wordlists.find_one({"_id": request.wordlist_id})
+        if not wordlist:
+            raise HTTPException(status_code=404, detail="Wordlist not found")
+
+        if not wordlist.get("words"):
+            raise HTTPException(status_code=404, detail="Wordlist is empty")
+
+        #use case execution
+        mongo.users.update_one(
+            { "_id": request.user_id },
+            {
+                "$addToSet": {
+                    "wordlists": request.wordlist_id
+                }
+            }
+        )
+
+        mongo.users.update_one(
+            { "_id": request.user_id },
+            {
+                "$addToSet": {
+                    "words": {
+                        "$each": [
+                            {
+                                "word_id": word_id,
+                                "is_new": True,
+                                "correct_count": 0,
+                                "mistakes_count": 0,
+                                "next_review": None,
+                                "last_review": None,
+                                "last_mistake": None,
+                                "problematic": False
+                            } for word_id in wordlist["words"]
+                        ]
+                    }
+                }
+            }
+        )
+
+        return {"message": "Wordlist assigned successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+#Anastasiia MongoDB report
+@app.get("/api/mongo/analytics/users/{id}/words")
+def get_words_from_user(id: int):
+    mongo = get_mongo()
+    try:
+        user = mongo.users.find_one({"_id": id})
+        if not user:
+            return []
+        
+        user_words = user.get("words", [])
+        word_ids = [word["word_id"] for word in user_words]
+        words_map = {
+            word["_id"]: word
+            for word in mongo.words.find({"_id": {"$in": word_ids}})
+        }
+
+        res = []
+        for uw in user_words:
+            word = words_map.get(uw["word_id"])
+            if not word: continue
+
+            res.append({
+                "word_id": word["_id"],
+                "word": word["word"],
+                "translation": word["translation"],
+                "is_new": uw.get("is_new"),
+                "correct_count": uw.get("correct_count"),
+                "mistakes_count": uw.get("mistakes_count"),
+                "next_review": uw.get("next_review"),
+                "last_reviewed": uw.get("last_reviewed"),
+                "problematic": uw.get("problematic")
+            })
+
+        return res
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/mongo/analytics/users/{id}/wordlist")
+def get_wordlist_from_user(id: int):
+    mongo = get_mongo()
+    try:
+        user = mongo.users.find_one(
+            {"_id": id},
+            {"wordlists": 1, "_id": 0}
+        )
+        if not user:
+            return []
+        
+        wordlist_ids = user.get("wordlists", [])
+        wordlists = mongo.wordlists.find(
+            {"_id": {"$in": wordlist_ids}},
+            {"_id": 1, "name": 1}
+        )
+
+        return [
+            {
+                "wordlist_id": wl["_id"],
+                "name": wl["name"]
+            } for wl in wordlists
+        ]
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
