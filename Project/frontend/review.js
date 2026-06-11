@@ -1,11 +1,13 @@
 let reviewSessionId = null;
 let currentWord = null;
+let sessionCorrect = 0;
+let sessionWrong = 0;
 
 async function toggleReviewModal() {
     const modal = document.getElementById('review-modal');
     const content = document.getElementById('review-content');
     
-    if (modal.style.display === 'flex') {
+    if (modal.classList.contains('flex')) {
         closeReviewModal();
         return;
     }
@@ -15,8 +17,13 @@ async function toggleReviewModal() {
         return;
     }
 
-    modal.style.display = 'flex';
-    content.innerHTML = '<p>Starting session...</p>';
+    // Reset session stats
+    sessionCorrect = 0;
+    sessionWrong = 0;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    content.innerHTML = '<div class="flex flex-col items-center"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-fjord-blue mb-4"></div><p class="text-gray-500 font-medium">Starting session...</p></div>';
 
     try {
         const res = await fetch('/api/review/start', {
@@ -27,23 +34,35 @@ async function toggleReviewModal() {
         
         if (!res.ok) {
             const err = await res.json();
-            content.innerHTML = `<p class="error">${err.detail || 'Error starting session'}</p>`;
+            content.innerHTML = `<p class="text-red-500 text-center font-medium">${err.detail || 'Error starting session'}</p>`;
             return;
         }
 
         const data = await res.json();
+        
+        if (data.message && data.message.includes("No words")) {
+            displayFinishedSession(data.message);
+            return;
+        }
+
         reviewSessionId = data.session_id;
         loadNextWord();
     } catch (err) {
-        content.innerHTML = '<p class="error">Failed to connect to backend.</p>';
+        content.innerHTML = '<p class="text-red-500 text-center font-medium">Failed to connect to backend.</p>';
     }
 }
 
 function closeReviewModal() {
-    document.getElementById('review-modal').style.display = 'none';
+    const modal = document.getElementById('review-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     if (reviewSessionId) {
         fetch(`/api/review/end?session_id=${reviewSessionId}`, { method: 'POST' });
         reviewSessionId = null;
+    }
+    // Refresh main dashboard report
+    if (typeof window.loadDetailedReport === 'function') {
+        window.loadDetailedReport();
     }
 }
 
@@ -54,83 +73,75 @@ async function loadNextWord() {
         const data = await res.json();
 
         if (data.finished) {
-            const reportRes = await fetch(`/api/review/session-report?user_id=${selectedUser}`);
-            const reportData = await reportRes.json();
-            
-            let reportHtml = `
-                <p style="text-align:center; color: #2c3e50; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">
-                    No words for today! Come back tomorrow :)
-                </p>
-                <p style="text-align:center; color: #27ae60; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px;">Session Complete!</p>
-                
-                <div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 5px;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                        <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                            <tr>
-                                <th style="padding: 8px; border-bottom: 1px solid #eee; text-align: left;">Word</th>
-                                <th style="padding: 8px; border-bottom: 1px solid #eee; text-align: left;">Topic</th>
-                                <th style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">✔️</th>
-                                <th style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">❌</th>
-                                <th style="padding: 8px; border-bottom: 1px solid #eee; text-align: left;">Next</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            if (reportData.length === 0) {
-                reportHtml += '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #999;">No detailed data for this session.</td></tr>';
-            } else {
-                reportData.forEach(row => {
-                    const nextDate = row.next_review ? new Date(row.next_review).toLocaleDateString() : 'N/A';
-                    reportHtml += `
-                        <tr>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${row.word}</strong></td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.topic_name}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${row.correct_count}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${row.mistakes_count}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">${nextDate}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            reportHtml += `
-                        </tbody>
-                    </table>
-                </div>
-                <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
-                    Last Session Volume: ${reportData.length > 0 ? reportData[0].last_session_volume : 0} words
-                </div>
-                <button onclick="closeReviewModal()" style="width:100%; margin-top:20px; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-            `;
-            
-            content.innerHTML = reportHtml;
+            displayFinishedSession();
             return;
         }
 
         currentWord = data;
         content.innerHTML = `
-            <div class="review-word">${data.word}</div>
-            <div id="translation" class="review-translation">${data.translation}</div>
-            <div class="review-actions" id="action-buttons">
-                <button onclick="showTranslation()" style="padding: 10px 20px;">Show Translation</button>
+            <div class="text-4xl font-bold text-fjord-blue text-center mb-10 transition-all">${data.word}</div>
+            <div id="translation" class="hidden text-2xl text-green-600 text-center mb-10 font-medium">${data.translation}</div>
+            <div class="flex flex-col space-y-3" id="action-buttons">
+                <button onclick="showTranslation()" class="w-full py-3 bg-fjord-blue text-white rounded-xl font-semibold hover:bg-fjord-blue-light transition-all shadow-md">
+                    Show Translation
+                </button>
             </div>
         `;
     } catch (err) {
-        content.innerHTML = '<p class="error">Error loading word.</p>';
+        content.innerHTML = '<p class="text-red-500 text-center font-medium">Error loading word.</p>';
     }
 }
 
+function displayFinishedSession(customMessage) {
+    const content = document.getElementById('review-content');
+    
+    // Minimalist Session Complete Screen
+    let html = `
+        <h2 class="text-3xl font-bold text-green-600 text-center mb-4">Session Complete!</h2>
+        <p class="text-center text-slate-text font-medium text-lg mb-8">
+            No words for today! Come back tomorrow :)
+        </p>
+        
+        <div class="flex justify-center items-center space-x-8 mb-10">
+            <div class="text-center">
+                <p class="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">Right</p>
+                <p class="text-4xl font-black text-green-600">${sessionCorrect}</p>
+            </div>
+            <div class="h-12 w-px bg-gray-200"></div>
+            <div class="text-center">
+                <p class="text-xs text-red-500 font-bold uppercase tracking-wider mb-1">Wrong</p>
+                <p class="text-4xl font-black text-red-500">${sessionWrong}</p>
+            </div>
+        </div>
+
+        <button onclick="closeReviewModal()" class="w-full py-4 bg-fjord-blue text-white font-bold rounded-xl hover:bg-fjord-blue-light transition-all shadow-md">
+            Return to Dashboard
+        </button>
+    `;
+    
+    content.innerHTML = html;
+}
+
 function showTranslation() {
-    document.getElementById('translation').style.display = 'block';
+    document.getElementById('translation').classList.remove('hidden');
     document.getElementById('action-buttons').innerHTML = `
-        <button class="btn-success" onclick="submitResult(true)" style="padding: 10px 25px;">Correct</button>
-        <button class="btn-danger" onclick="submitResult(false)" style="padding: 10px 25px;">Incorrect</button>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="submitResult(true)" class="py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all shadow-md">
+                Correct
+            </button>
+            <button onclick="submitResult(false)" class="py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-md">
+                Incorrect
+            </button>
+        </div>
     `;
 }
 
 async function submitResult(isCorrect) {
     const content = document.getElementById('review-content');
+    
+    if (isCorrect) sessionCorrect++;
+    else sessionWrong++;
+
     try {
         const res = await fetch('/api/review/submit', {
             method: 'POST',
@@ -144,12 +155,15 @@ async function submitResult(isCorrect) {
         });
 
         if (res.ok) {
-            content.innerHTML = '<p style="text-align:center; color: #27ae60; font-size: 1.1rem;">Updating...</p>';
-            setTimeout(loadNextWord, 500);
+            content.innerHTML = `<div class="flex flex-col items-center">
+                <div class="animate-pulse text-green-600 font-bold text-xl">${isCorrect ? 'Brilliant!' : 'Keep going!'}</div>
+                <p class="text-gray-400 text-sm mt-2">Next word coming up...</p>
+            </div>`;
+            setTimeout(loadNextWord, 600);
         } else {
-            content.innerHTML = '<p class="error">Error submitting result.</p>';
+            content.innerHTML = '<p class="text-red-500 text-center">Error submitting result.</p>';
         }
     } catch (err) {
-        content.innerHTML = '<p class="error">Network error.</p>';
+        content.innerHTML = '<p class="text-red-500 text-center">Network error.</p>';
     }
 }
