@@ -1,312 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-snow-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Norwegian Learning App</title>
+    <title>NorwLearn - Nordic Language Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'card-white': '#ffffff',
+                        'fjord-blue': '#1e3a5f',
+                        'fjord-blue-light': '#2c5282',
+                        'snow-white': '#fdfbf7',
+                        'nordic-gray': '#f3f4f6',
+                        'slate-text': '#2d3748',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; }
+        .transition-all { transition: all 0.3s ease; }
+        [v-cloak] { display: none; }
+        #review-modal {
+            background-color: rgba(44, 75, 107, 0.3);
+            backdrop-filter: blur(4px);
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        header h1 {
-            font-size: 1.4rem;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-size: 0.95rem;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-
-        .card h2 {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            color: #2c3e50;
-        }
-
-        select, button {
-            padding: 8px 14px;
-            font-size: 0.95rem;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-right: 10px;
-        }
-
-        button {
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #3d5166;
-        }
-
-        button.orange {
-            background-color: #e67e22;
-        }
-
-        button.orange:hover {
-            background-color: #d35400;
-        }
-
-        .status {
-            margin-top: 12px;
-            font-size: 0.9rem;
-            color: #27ae60;
-        }
-
-        .error {
-            color: #e74c3c;
-        }
-
-        /* REVIEW MODAL STYLES */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .review-word {
-            font-size: 2rem;
-            text-align: center;
-            margin: 20px 0;
-            color: #2c3e50;
-            font-weight: bold;
-        }
-
-        .review-translation {
-            display: none;
-            font-size: 1.4rem;
-            text-align: center;
-            margin-bottom: 25px;
-            color: #27ae60;
-        }
-
-        .review-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .btn-success { background-color: #27ae60; }
-        .btn-danger { background-color: #e74c3c; }
     </style>
 </head>
-<body>
+<body class="h-full text-slate-text antialiased bg-snow-white">
 
-<header>
-    <h1>🇳🇴 Norwegian Learning App</h1>
-    <nav>
-        <a href="#seed-section">Seed Data</a>
-        <a href="#user-section">Select User</a>
-        <a href="#usecases-section">Use Cases</a>
-        <a href="#migrate-section">Migrate</a>
+    <nav class="sticky top-0 z-50 bg-card-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold tracking-tight text-fjord-blue">🇳🇴 Norwegian Language App</span>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <!-- GenData Button -->
+                    <button onclick="seedDatabase()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-card-white hover:bg-nordic-gray focus:outline-none transition-all">
+                        genData
+                    </button>
+
+                    <!-- User Selector -->
+                    <div class="relative group">
+                        <button id="profile-dropdown-btn" class="flex items-center space-x-2 text-sm font-medium hover:text-fjord-blue focus:outline-none transition-all">
+                            <span id="nav-user-display">Select User</span>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-card-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div class="py-1" id="user-dropdown-list" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Users populated here -->
+                            </div>
+                            <div class="border-t border-gray-100 py-1">
+                                <button onclick="setAppMode('Admin')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-nordic-gray">Mode: Admin</button>
+                                <button onclick="setAppMode('Student')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-nordic-gray">Mode: Student</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
-</header>
 
-<div class="container">
+    <!-- MAIN CONTENT AREA -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-    <!-- SEED SECTION -->
-    <div class="card" id="seed-section">
-        <h2>Database Management</h2>
-        <button onclick="seedDatabase()">Generate Random Data</button>
-        <p class="status" id="seed-status"></p>
+        <!-- DASHBOARD CONTAINER -->
+        <div id="dashboard-view" class="space-y-6">
+
+            <!-- ADMIN VIEW -->
+            <div id="admin-view" class="hidden animate-in fade-in duration-500">
+                <div class="mb-6">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Mode: Admin
+                    </span>
+                    <h1 id="admin-welcome" class="mt-2 text-4xl font-extrabold tracking-tight text-fjord-blue">Hello, Admin!</h1>
+                </div>
+
+                <div class="flex flex-row space-x-4 max-w-2xl mb-10">
+                    <button onclick="window.location.href='assign-wordlist.html'" class="flex items-center justify-center px-6 py-3 bg-card-white border-2 border-fjord-blue text-fjord-blue font-semibold rounded-xl hover:bg-fjord-blue hover:text-white transition-all shadow-sm">
+                        Assign Wordlist (Anastasiia)
+                    </button>
+                    <button onclick="window.location.href='wordlist-words.html'" class="flex items-center justify-center px-6 py-3 bg-card-white border-2 border-fjord-blue text-fjord-blue font-semibold rounded-xl hover:bg-fjord-blue hover:text-white transition-all shadow-sm">
+                        Add Word to Wordlist (Ines)
+                    </button>
+                </div>
+
+                <!-- Admin Session Logs (New) -->
+                <div class="bg-card-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <h2 class="text-xl font-bold text-fjord-blue mb-6">Session logs</h2>
+
+                    <!-- Filters -->
+                    <div class="flex flex-wrap items-center gap-4 mb-6">
+                        <select id="log-user-filter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-slate-text focus:outline-none focus:border-fjord-blue bg-card-white">
+                            <option value="">All Users</option>
+                        </select>
+                        <input type="date" id="log-date-filter" class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-slate-text focus:outline-none focus:border-fjord-blue bg-card-white">
+                        <button onclick="loadSessionLogs()" class="px-6 py-2 bg-fjord-blue text-white rounded-lg text-sm font-bold hover:bg-fjord-blue-light transition-all shadow-sm">Filter</button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="border border-gray-100 rounded-xl overflow-hidden">
+                        <div class="overflow-x-auto overflow-y-auto max-h-[500px]">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-snow-white sticky top-0 border-b border-gray-100 z-10">
+                                    <tr>
+                                        <th class="px-6 py-4 font-semibold text-slate-text text-base bg-snow-white">Date</th>
+                                        <th class="px-6 py-4 font-semibold text-slate-text text-base bg-snow-white">User</th>
+                                        <th class="px-6 py-4 font-semibold text-slate-text text-base bg-snow-white">Topic</th>
+                                        <th class="px-6 py-4 font-semibold text-slate-text text-base text-center bg-snow-white">Words Practiced</th>
+                                        <th class="px-6 py-4 font-bold text-center text-xl bg-snow-white"><span class="text-purple-600">✔️</span></th>
+                                        <th class="px-6 py-4 font-bold text-center text-xl bg-snow-white"><span class="text-red-500">❌</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="session-logs-tbody" class="divide-y divide-gray-50">
+                                    <tr><td colspan="6" class="px-6 py-10 text-center text-gray-400">Loading logs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDENT VIEW -->
+            <div id="student-view" class="hidden animate-in fade-in duration-500">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Mode: Student (Learner)
+                        </span>
+                        <h1 id="student-welcome" class="mt-2 text-4xl font-extrabold tracking-tight text-fjord-blue flex items-center space-x-3">
+                            <span>Welcome back, User!</span>
+                            <!-- Streak will be injected here by app.js -->
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Statistics and Report -->
+                    <div class="lg:col-span-2 space-y-8">
+
+                        <!-- High Level Stats -->
+                        <div class="bg-card-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <h2 class="text-lg font-semibold text-fjord-blue mb-6">Learning Statistics</h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="p-4 bg-nordic-gray rounded-xl">
+                                    <p class="text-sm text-gray-500 font-medium">Daily Streak</p>
+                                    <p class="text-3xl font-bold text-fjord-blue mt-1">12 Days</p>
+                                </div>
+                                <div class="p-4 bg-nordic-gray rounded-xl">
+                                    <p class="text-sm text-gray-500 font-medium">Words Learned</p>
+                                    <p class="text-3xl font-bold text-fjord-blue mt-1">142</p>
+                                </div>
+                                <div class="p-4 bg-nordic-gray rounded-xl">
+                                    <p class="text-sm text-gray-500 font-medium">Success Rate</p>
+                                    <p class="text-3xl font-bold text-fjord-blue mt-1">88%</p>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar Placeholder -->
+                            <div class="mt-8 mb-10">
+                                <div class="flex justify-between text-sm font-medium mb-2">
+                                    <span>Weekly Progress</span>
+                                    <span>75%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-fjord-blue h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Progress Table (Moved inside Statistics Card) -->
+                            <div class="border-t border-gray-100 pt-8 overflow-hidden">
+                                <h3 class="text-lg font-semibold text-fjord-blue mb-6">Review Session Statistics</h3>
+                                <div id="detailed-report-container" class="overflow-x-auto max-h-80">
+                                    <p class="text-gray-400 text-center py-10">No recent activity data available.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Call to Action -->
+                    <div class="lg:col-span-1 flex flex-col justify-start">
+                        <div class="bg-fjord-blue rounded-2xl p-8 text-white shadow-lg transform hover:scale-[1.02] transition-all sticky top-24">
+                            <h3 class="text-xl font-bold mb-2">Ready to practice?</h3>
+                            <p class="text-blue-100 text-sm mb-6">Review your pending words to maintain your streak.</p>
+                            <button onclick="toggleReviewModal()" class="w-full py-4 bg-card-white text-fjord-blue font-bold rounded-xl hover:bg-nordic-gray transition-all shadow-md">
+                                Start Review Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NO USER SELECTED VIEW -->
+            <div id="empty-view" class="text-center py-20">
+                <div class="mb-6 text-6xl">🏔️</div>
+                <h2 class="text-2xl font-semibold text-gray-400">Please select a user from the profile menu to begin.</h2>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- STATUS BANNER -->
+    <div id="seed-banner" class="hidden fixed bottom-5 right-5 bg-fjord-blue text-white px-6 py-3 rounded-lg shadow-2xl animate-bounce">
+        Seeding database...
     </div>
 
-    <!-- USER SELECTOR -->
-    <div class="card" id="user-section">
-        <h2>Select User</h2>
-        <select id="user-select" onchange="selectUser()">
-            <option value="">-- Select a user --</option>
-        </select>
-        <p class="status" id="user-status"></p>
-    </div>
-
-    <!-- USE CASES -->
-    <div class="card" id="usecases-section">
-        <h2>Use Cases</h2>
-        <button onclick="toggleReviewModal()">
-            Word Review (Anna)
-        </button>
-        <button onclick="window.location.href='assign-wordlist.html'">
-            Assign Wordlist (Anastasiia)
-        </button>
-        <button onclick="window.location.href='wordlist-words.html'">
-            Add Word to Wordlist (Ines)
-        </button>
-    </div>
-
-    <!-- MIGRATION SECTION -->
-    <div class="card" id="migrate-section">
-        <h2>MongoDB Migration</h2>
-        <p style="color:#888; font-size:0.9rem; margin-bottom:12px;">
-            Migrate all data from MariaDB to MongoDB.
-            MongoDB will be cleared first.
-            After migration the app switches to MongoDB.
-        </p>
-        <button class="orange" onclick="migrateToMongoDB()">
-            Migrate to MongoDB
-        </button>
-        <p class="status" id="migrate-status"></p>
-    </div>
-
-</div>
-
-<!-- REVIEW MODAL -->
-<div id="review-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeReviewModal()">&times;</span>
-        <h2 style="text-align: center; margin-bottom: 10px;">Review Session</h2>
-        <div id="review-content">
-            <!-- Dynamic content from review.js -->
+    <!-- REVIEW MODAL (Managed by review.js) -->
+    <div id="review-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="bg-card-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="relative px-8 py-10">
+                <button onclick="closeReviewModal()" class="absolute top-6 right-6 text-gray-400 hover:text-fjord-blue">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <h2 class="text-2xl font-bold text-fjord-blue text-center mb-8">Review Session</h2>
+                <div id="review-content" class="min-h-[200px] flex flex-col justify-center">
+                    <!-- Dynamic review content -->
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="review.js"></script>
-<script>
-    let selectedUser = null;
-
-    // ── Load users into dropdown on page load ──
-    async function loadUsers() {
-        try {
-            const res = await fetch('/api/users');
-            const users = await res.json();
-            const select = document.getElementById('user-select');
-            select.innerHTML = '<option value="">-- Select a user --</option>';
-            users.forEach(u => {
-                const option = document.createElement('option');
-                option.value = u.user_id;
-                option.textContent = `${u.username} (${u.user_type})`;
-                select.appendChild(option);
-            });
-        } catch (err) {
-            console.error('Failed to load users:', err);
-        }
-    }
-
-    // ── Save selected user to localStorage ──
-    function selectUser() {
-        const select = document.getElementById('user-select');
-        selectedUser = select.value;
-        const username = select.options[select.selectedIndex].text;
-        if (selectedUser) {
-            localStorage.setItem('selected_user_id', selectedUser);
-            localStorage.setItem('selected_username', username);
-            document.getElementById('user-status').textContent
-                = `Active user: ${username}`;
-        }
-    }
-
-    // ── Seed MariaDB with random data ──
-    async function seedDatabase() {
-        const statusEl = document.getElementById('seed-status');
-        statusEl.textContent = 'Seeding database...';
-        statusEl.className = 'status';
-        try {
-            const res = await fetch('/api/seed', { method: 'POST' });
-            const data = await res.json();
-            if (res.ok) {
-                statusEl.textContent = '✓ ' + data.message;
-            } else {
-                statusEl.textContent = 'Error: ' + data.detail;
-                statusEl.className = 'status error';
-            }
-            loadUsers();
-        } catch (err) {
-            statusEl.textContent = 'Error seeding database.';
-            statusEl.className = 'status error';
-        }
-    }
-
-    // ── Migrate MariaDB → MongoDB ──
-    async function migrateToMongoDB() {
-        const statusEl = document.getElementById('migrate-status');
-        statusEl.textContent = 'Migrating... please wait';
-        statusEl.className = 'status';
-        try {
-            const res = await fetch('/api/migrate', { method: 'POST' });
-            const data = await res.json();
-            if (res.ok) {
-                statusEl.textContent = '✓ ' + data.message;
-            } else {
-                statusEl.textContent = 'Error: ' + data.detail;
-                statusEl.className = 'status error';
-            }
-        } catch (err) {
-            statusEl.textContent = 'Migration failed.';
-            statusEl.className = 'status error';
-        }
-    }
-
-    // Run on page load 
-    loadUsers();
-</script>
-
+    <!-- SCRIPTS -->
+    <script src="app.js"></script>
+    <script src="review.js"></script>
 </body>
 </html>
