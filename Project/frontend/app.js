@@ -1,12 +1,10 @@
-// Application State
 let appState = {
     selectedUser: null,
     selectedUsername: 'User',
-    currentMode: 'Student', // Admin or Student
+    currentMode: 'Student', // admin or student
     users: []
 };
 
-// DOM Elements
 const navUserDisplay = document.getElementById('nav-user-display');
 const userDropdownList = document.getElementById('user-dropdown-list');
 const profileDropdown = document.getElementById('profile-dropdown');
@@ -21,22 +19,19 @@ const studentWelcome = document.getElementById('student-welcome');
 const seedBanner = document.getElementById('seed-banner');
 const detailedReportContainer = document.getElementById('detailed-report-container');
 
-// Initialize Application
 async function init() {
     await loadUsers();
     setupDropdown();
     
-    // Check localStorage for previous session
+
     const savedId = localStorage.getItem('selected_user_id');
     const savedName = localStorage.getItem('selected_username');
     if (savedId && savedName) {
-        // Find user type
         const user = appState.users.find(u => u.user_id == savedId);
         selectUser(savedId, savedName, user ? user.user_type : 'Basic');
     }
 }
 
-// Setup Profile Dropdown Toggle
 function setupDropdown() {
     profileDropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -48,7 +43,7 @@ function setupDropdown() {
     });
 }
 
-// Load users from API
+
 async function loadUsers() {
     try {
         const res = await fetch('/api/users');
@@ -60,11 +55,9 @@ async function loadUsers() {
     }
 }
 
-// Render users into the dropdown
 function renderUserDropdown() {
     userDropdownList.innerHTML = '';
-    
-    // Also populate the admin log filter if it exists
+
     const logFilter = document.getElementById('log-user-filter');
     if (logFilter) {
         logFilter.innerHTML = '<option value="">All Users</option>';
@@ -86,11 +79,10 @@ function renderUserDropdown() {
     });
 }
 
-// Select User and update UI
 function selectUser(id, username, type = 'Basic') {
     appState.selectedUser = id;
     appState.selectedUsername = username;
-    selectedUser = id; // Global for review.js
+    selectedUser = id;
 
     localStorage.setItem('selected_user_id', id);
     localStorage.setItem('selected_username', username);
@@ -98,17 +90,17 @@ function selectUser(id, username, type = 'Basic') {
     navUserDisplay.textContent = username;
     adminWelcome.textContent = `Hello, ${username}!`;
     
-    // Add streak to student welcome
-    const streakDays = Math.floor(Math.random() * 15) + 1; // Simulated streak for visual effect
+    // streak
+    const streakDays = Math.floor(Math.random() * 15) + 1;
     
     let welcomeHtml = `
         <span>Welcome back, ${username}!</span>
         <span class="text-xl font-bold text-orange-500 bg-orange-100 px-3 py-1 rounded-full shadow-sm">🔥 ${streakDays} Day Streak!</span>
     `;
 
-    // Add remaining words counter for Basic users
+
     if (type === 'Basic') {
-        const remainingWords = Math.floor(Math.random() * 20); // Random 0-19 remaining
+        const remainingWords = Math.floor(Math.random() * 20);
         welcomeHtml += `
             <span class="text-base font-bold text-fjord-blue bg-blue-50 border border-blue-100 px-3 py-1 rounded-full shadow-sm ml-2">
                 Free words left today: ${remainingWords}
@@ -118,7 +110,6 @@ function selectUser(id, username, type = 'Basic') {
     
     studentWelcome.innerHTML = welcomeHtml;
 
-    // Auto-switch mode based on user type if not manually set
     if (type === 'Admin') {
         appState.currentMode = 'Admin';
     } else {
@@ -128,7 +119,7 @@ function selectUser(id, username, type = 'Basic') {
     updateView();
 }
 
-// Manually set App Mode
+
 function setAppMode(mode) {
     if (!appState.selectedUser) {
         alert('Please select a user first.');
@@ -138,7 +129,7 @@ function setAppMode(mode) {
     updateView();
 }
 
-// Toggle Views based on State
+
 function updateView() {
     emptyView.classList.add('hidden');
     adminView.classList.add('hidden');
@@ -148,14 +139,14 @@ function updateView() {
         emptyView.classList.remove('hidden');
     } else if (appState.currentMode === 'Admin') {
         adminView.classList.remove('hidden');
-        loadSessionLogs(); // Load logs when switching to admin
+        loadSessionLogs();
     } else {
         studentView.classList.remove('hidden');
-        loadDetailedReport(); // Load report when switching to student
+        loadDetailedReport();
     }
 }
 
-// Load Admin Session Logs
+//session logs
 window.loadSessionLogs = async function() {
     const userId = document.getElementById('log-user-filter').value;
     const date = document.getElementById('log-date-filter').value;
@@ -196,7 +187,7 @@ window.loadSessionLogs = async function() {
     }
 }
 
-// Load Detailed Report for Dashboard
+//detailed report
 window.loadDetailedReport = async function() {
     if (!appState.selectedUser || !detailedReportContainer) return;
     
@@ -239,7 +230,6 @@ window.loadDetailedReport = async function() {
     }
 }
 
-// Seed Database logic
 async function seedDatabase() {
     seedBanner.classList.remove('hidden');
     try {
@@ -254,5 +244,20 @@ async function seedDatabase() {
     }
 }
 
-// Start App
+async function migrateToNoSQL() {
+    seedBanner.textContent = 'Migrating to NoSQL...';
+    seedBanner.classList.remove('hidden');
+    try {
+        const res = await fetch('/api/migrate', { method: 'POST' });
+        const data = await res.json();
+        seedBanner.classList.add('hidden');
+        alert(data.message || 'Migration completed successfully!');
+    } catch (err) {
+        seedBanner.classList.add('hidden');
+        alert('Error during migration.');
+    }
+    setTimeout(() => { seedBanner.textContent = 'Seeding database...'; }, 1000);
+}
+
+
 init();

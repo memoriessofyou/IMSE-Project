@@ -17,7 +17,7 @@ async function toggleReviewModal() {
         return;
     }
 
-    // Reset session stats
+
     sessionCorrect = 0;
     sessionWrong = 0;
 
@@ -60,7 +60,7 @@ function closeReviewModal() {
         fetch(`/api/review/end?session_id=${reviewSessionId}`, { method: 'POST' });
         reviewSessionId = null;
     }
-    // Refresh main dashboard report
+
     if (typeof window.loadDetailedReport === 'function') {
         window.loadDetailedReport();
     }
@@ -94,8 +94,7 @@ async function loadNextWord() {
 
 function displayFinishedSession(customMessage) {
     const content = document.getElementById('review-content');
-    
-    // Minimalist Session Complete Screen
+
     let html = `
         <h2 class="text-3xl font-bold text-green-600 text-center mb-4">Session Complete!</h2>
         <p class="text-center text-slate-text font-medium text-lg mb-8">
