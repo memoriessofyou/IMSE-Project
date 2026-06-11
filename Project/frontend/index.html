@@ -80,6 +80,14 @@
             background-color: #3d5166;
         }
 
+        button.orange {
+            background-color: #e67e22;
+        }
+
+        button.orange:hover {
+            background-color: #d35400;
+        }
+
         .status {
             margin-top: 12px;
             font-size: 0.9rem;
@@ -157,6 +165,7 @@
         <a href="#seed-section">Seed Data</a>
         <a href="#user-section">Select User</a>
         <a href="#usecases-section">Use Cases</a>
+        <a href="#migrate-section">Migrate</a>
     </nav>
 </header>
 
@@ -192,6 +201,20 @@
         </button>
     </div>
 
+    <!-- MIGRATION SECTION -->
+    <div class="card" id="migrate-section">
+        <h2>MongoDB Migration</h2>
+        <p style="color:#888; font-size:0.9rem; margin-bottom:12px;">
+            Migrate all data from MariaDB to MongoDB.
+            MongoDB will be cleared first.
+            After migration the app switches to MongoDB.
+        </p>
+        <button class="orange" onclick="migrateToMongoDB()">
+            Migrate to MongoDB
+        </button>
+        <p class="status" id="migrate-status"></p>
+    </div>
+
 </div>
 
 <!-- REVIEW MODAL -->
@@ -209,7 +232,7 @@
 <script>
     let selectedUser = null;
 
-    // Load users into dropdown on page load
+    // ── Load users into dropdown on page load ──
     async function loadUsers() {
         try {
             const res = await fetch('/api/users');
@@ -227,6 +250,7 @@
         }
     }
 
+    // ── Save selected user to localStorage ──
     function selectUser() {
         const select = document.getElementById('user-select');
         selectedUser = select.value;
@@ -234,11 +258,12 @@
         if (selectedUser) {
             localStorage.setItem('selected_user_id', selectedUser);
             localStorage.setItem('selected_username', username);
-            document.getElementById('user-status').textContent 
+            document.getElementById('user-status').textContent
                 = `Active user: ${username}`;
         }
     }
 
+    // ── Seed MariaDB with random data ──
     async function seedDatabase() {
         const statusEl = document.getElementById('seed-status');
         statusEl.textContent = 'Seeding database...';
@@ -246,15 +271,40 @@
         try {
             const res = await fetch('/api/seed', { method: 'POST' });
             const data = await res.json();
-            statusEl.textContent = data.message || 'Done!';
-            loadUsers(); // refresh user dropdown after seed
+            if (res.ok) {
+                statusEl.textContent = '✓ ' + data.message;
+            } else {
+                statusEl.textContent = 'Error: ' + data.detail;
+                statusEl.className = 'status error';
+            }
+            loadUsers();
         } catch (err) {
             statusEl.textContent = 'Error seeding database.';
             statusEl.className = 'status error';
         }
     }
 
-    // Run on page load
+    // ── Migrate MariaDB → MongoDB ──
+    async function migrateToMongoDB() {
+        const statusEl = document.getElementById('migrate-status');
+        statusEl.textContent = 'Migrating... please wait';
+        statusEl.className = 'status';
+        try {
+            const res = await fetch('/api/migrate', { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                statusEl.textContent = '✓ ' + data.message;
+            } else {
+                statusEl.textContent = 'Error: ' + data.detail;
+                statusEl.className = 'status error';
+            }
+        } catch (err) {
+            statusEl.textContent = 'Migration failed.';
+            statusEl.className = 'status error';
+        }
+    }
+
+    // Run on page load 
     loadUsers();
 </script>
 
